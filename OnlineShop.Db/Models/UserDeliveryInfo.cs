@@ -1,14 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace OnlineShopWebApp.Models
+﻿namespace OnlineShop.Db.Models
 {
     public class UserDeliveryInfo
     {
-        [Required]
+        public Guid Id { get; set; }
         public string Name { get; set; }
-        [Required]
         public string Phone { get; set; }
-        [Required]
         public string Address { get; set; }
     }
 }

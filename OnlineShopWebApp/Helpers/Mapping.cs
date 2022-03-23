@@ -5,7 +5,7 @@ namespace OnlineShopWebApp.Helpers
 {
     public static class Mapping
     {
-        public static List<ProductViewModel> ToProductViewModels(List<Product> products)
+        public static List<ProductViewModel> ToProductViewModels(this List<Product> products)
         {
             var productsViewModels = new List<ProductViewModel>();
             foreach (var product in products)
@@ -14,7 +14,7 @@ namespace OnlineShopWebApp.Helpers
             }
             return productsViewModels;
         }
-        public static ProductViewModel ToProductViewModel(Product product)
+        public static ProductViewModel ToProductViewModel(this Product product)
         {
             return new ProductViewModel
             {
@@ -25,7 +25,7 @@ namespace OnlineShopWebApp.Helpers
                 ImagePath = product.ImagePath
             };
         }
-        public static CartViewModel ToCartViewModel(Cart cart)
+        public static CartViewModel ToCartViewModel(this Cart cart)
         {
             if (cart == null)
             {
@@ -38,7 +38,7 @@ namespace OnlineShopWebApp.Helpers
                 Items = ToCartItemsViewModels(cart.Items),
             };
         }
-        public static List<CartItemViewModel> ToCartItemsViewModels(List<CartItem> cartDbItems)
+        public static List<CartItemViewModel> ToCartItemsViewModels(this List<CartItem> cartDbItems)
         {
             var cartItems = new List<CartItemViewModel>();
             foreach (var cartDbItem in cartDbItems)
@@ -52,6 +52,38 @@ namespace OnlineShopWebApp.Helpers
                 cartItems.Add(cartItem);
             }
             return cartItems;
+        }
+
+        public static OrderViewModel ToOrderViewModel(this Order order)
+        {
+            return new OrderViewModel
+            {
+                Id = order.Id,
+                CreatedDateTime = order.CreatedDateTime,
+                Status = (OrderStatusViewModel)(int)order.Status,
+                User = ToUserDeliveryInfoViewModel(order.User),
+                Items = ToCartItemsViewModels(order.Items)
+            };
+        }
+
+        public static UserDeliveryInfoViewModel ToUserDeliveryInfoViewModel(this UserDeliveryInfo deliveryInfo)
+        {
+            return new UserDeliveryInfoViewModel
+            {
+                Name = deliveryInfo.Name,
+                Address = deliveryInfo.Address,
+                Phone = deliveryInfo.Phone
+            };
+        }
+
+        public static UserDeliveryInfo ToUser(this UserDeliveryInfoViewModel user)
+        {
+            return new UserDeliveryInfo
+            {
+                Name = user.Name,
+                Address = user.Address,
+                Phone = user.Phone
+            };
         }
     }
 }

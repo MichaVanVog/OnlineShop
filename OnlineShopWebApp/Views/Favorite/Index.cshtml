@@ -1,6 +1,6 @@
 ﻿@model List<ProductViewModel>
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Favorite";
 }
 <div class="row">
     @foreach (var product in Model)
@@ -14,14 +14,9 @@
                     </a>
                     <h5>@product.Cost руб.</h5>
                     <a class="btn-primary btn-dark" asp-area="" asp-controller="Cart" asp-action="Add" asp-route-productId="@product.Id" role="button">Добавить в корзину</a>
-                    <a class="btn-primary btn-success" asp-area="" asp-controller="Favorite" asp-action="Add" asp-route-productId="@product.Id" role="button">Добавить в избранное</a>
+                    <a class="btn-primary btn-success" asp-area="" asp-controller="Favorite" asp-action="Remove" asp-route-productId="@product.Id" role="button">Удалить из избранного</a>
                 </div>
             </div>
         </div>
     }
-</div>
-
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OnlineShop.Db;
+using OnlineShop.Db.Models;
 using OnlineShopWebApp.Helpers;
 using OnlineShopWebApp.Models;
 
@@ -20,18 +21,18 @@ namespace OnlineShopWebApp.Controllers
             return View();
         }
         [HttpPost]
-        public IActionResult Buy(UserDeliveryInfo user)
+        public IActionResult Buy(UserDeliveryInfoViewModel userViewModel)
         {
             if (!ModelState.IsValid)
             {
-                return View("Index", user);
+                return View(nameof(Index), userViewModel);
             }
             var existingCart = cartsRepository.TryGetByUserId(Constants.UserId);
-            var existingCartViewModel =Mapping.ToCartViewModel(existingCart);
+
             var order = new Order
             {
-                User = user,
-                Items = existingCartViewModel.Items
+                User = userViewModel.ToUser(),
+                Items = existingCart.Items
             };
             ordersRepository.Add(order);
             cartsRepository.Clear(Constants.UserId);

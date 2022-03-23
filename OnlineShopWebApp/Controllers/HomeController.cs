@@ -16,7 +16,7 @@ namespace OnlineShopWebApp.Controllers
         public IActionResult Index()
         {
             var products = productRepository.GetAll();
-            return View(Mapping.ToProductViewModels(products));
+            return View(products.ToProductViewModels());
         }
 
         public IActionResult Privacy()

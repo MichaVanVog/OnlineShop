@@ -20,7 +20,7 @@ namespace OnlineShopWebApp.Areas.Admin.Controllers
         public IActionResult Index()
         {
             var products = productsRepository.GetAll();
-            return View(Mapping.ToProductViewModels(products));
+            return View(products.ToProductViewModels());
         }
 
         public IActionResult Add()
