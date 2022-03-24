@@ -5,6 +5,7 @@
     </div>
 
     <div class="text-danger font-weight-bold" asp-validation-summary="ModelOnly"></div>
+    <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
 
     <div class="row">
         <div class="col-6">
@@ -25,8 +26,8 @@
     <div class="row">
         <div class="col-6">
             <label>Запомнить меня?</label>
-            <input class="form-control" type="checkbox" name="rememberMe" />
-            <a class="form-cotroller" asp-controller="Account" asp-action="Registr">Регистрация нового пользователя</a>
+            <input class="form-control" type="checkbox" name="rememberMe" value="true" />
+            <a class="form-cotroller" asp-controller="Account" asp-action="Registr" asp-route-ReturnUrl="@Model.ReturnUrl" >Регистрация нового пользователя</a>
         </div>
     </div>
     <div class="col">

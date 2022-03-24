@@ -16,5 +16,6 @@ namespace OnlineShopWebApp.Models
         [Required(ErrorMessage = "Повторите пароль")]
         [Compare("Password")]
         public string ConfirmPassword { get; set; }
+        public string ReturnUrl { get; set; }
     }
 }

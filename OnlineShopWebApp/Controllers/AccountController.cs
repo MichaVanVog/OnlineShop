@@ -1,46 +1,49 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using OnlineShop.Db.Models;
 using OnlineShopWebApp.Models;
 
 namespace OnlineShopWebApp.Controllers
 {
+
     public class AccountController : Controller
     {
-        private readonly IUsersManager userManager;
-        public AccountController(IUsersManager userManager)
+        private readonly IUsersManager usersManager;
+        private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
+        public AccountController(IUsersManager usersManager, UserManager<User> userManager, SignInManager<User> signInManager)
         {
-            this.userManager = userManager;
+            this.usersManager = usersManager;
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
 
-        public IActionResult Login()
+        public IActionResult Login(string returnUrl)
         {
-            return View();
+            return View(new Login() { ReturnUrl = returnUrl });
         }
 
         [HttpPost]
         public IActionResult Login(Login login)
         {
-            if (!ModelState.IsValid)
-                return RedirectToAction(nameof(Login));
-
-            var useraccount = userManager.TryGetByName(login.Username);
-            if (useraccount == null)
+            if (ModelState.IsValid)
             {
-                ModelState.AddModelError(string.Empty, "Такого пользователя не существует.");
-                return RedirectToAction(nameof(Login));
+                var result = _signInManager.PasswordSignInAsync(login.Username, login.Password, login.RememberMe, false).Result;
+                if (result.Succeeded)
+                {
+                    return RedirectToAction(login.ReturnUrl);
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Неправильный пароль");
+                }
             }
-
-            if (useraccount.Password != login.Password)
-            {
-                ModelState.AddModelError(string.Empty, "Неправильный пароль");
-                return RedirectToAction(nameof(Login));
-            }
-
-            return RedirectToAction(nameof(HomeController.Index), nameof(HomeController).Replace("Controller", ""));
+            return View(login);
         }
 
-        public IActionResult Registr()
+        public IActionResult Registr(string returnUrl)
         {
-            return View();
+            return View(new Registr() { ReturnUrl = returnUrl});
         }
 
         [HttpPost]
@@ -52,15 +55,28 @@ namespace OnlineShopWebApp.Controllers
             }
             if (ModelState.IsValid)
             {
-                userManager.Add(new UserAccount
+                User user = new() { Email = registr.Username, UserName = registr.Username };
+                var result = _userManager.CreateAsync(user, registr.Password).Result;
+                if (result.Succeeded)
                 {
-                    Name = registr.Username,
-                    Password = registr.Password,
-                    Phone = registr.Phone
-                });
-                return RedirectToAction(nameof(HomeController.Index), nameof(HomeController).Replace("Controller", ""));
+                    _signInManager.SignInAsync(user, false);
+                    return RedirectToAction(nameof(HomeController.Index), nameof(HomeController).Replace("Controller", ""));
+                }
+                else
+                {
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, "Логин не возможен");
+                    }
+                }
             }
-            return RedirectToAction(nameof(Registr));
+            return View(registr);
+        }
+
+        public IActionResult Logout()
+        {
+            _signInManager.SignOutAsync().Wait();
+            return RedirectToAction(nameof(HomeController.Index), nameof(HomeController).Replace("Controller", ""));
         }
     }
 }
