@@ -1,4 +1,5 @@
-﻿using OnlineShop.Db.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using OnlineShop.Db.Models;
 
 namespace OnlineShop.Db
 {
@@ -13,20 +14,18 @@ namespace OnlineShop.Db
 
         public void Add(Product product)
         {
-
-            product.ImagePath = "/productImages/image5.jpg";
             databaseContext.Products.Add(product);
             databaseContext.SaveChanges();
         }
 
         public List<Product> GetAll()
         {
-            return databaseContext.Products.ToList();
+            return databaseContext.Products.Include(x => x.Images).ToList();
         }
 
         public Product TryGetById(Guid id)
         {
-            return databaseContext.Products.FirstOrDefault(product => product.Id == id);
+            return databaseContext.Products.Include(x=>x.Images).FirstOrDefault(product => product.Id == id);
         }
 
         public void Update(Product product)
@@ -42,5 +41,12 @@ namespace OnlineShop.Db
             existingProduct.Cost = product.Cost;
             databaseContext.SaveChanges();
         }
+
+        //public void Remove(Guid id)
+        //{
+        //    var product = TryGetById(id);
+        //    databaseContext.Products.Remove(product);
+        //    databaseContext.SaveChanges();
+        //}
     }
 }

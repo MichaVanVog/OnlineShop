@@ -1,6 +1,6 @@
-﻿@model ProductViewModel
+﻿@model AddProductViewModel
 
-<form method="post">
+<form method="post" enctype="multipart/form-data">
     <div>
         <h3>Создание нового продукта</h3>
     </div>
@@ -30,6 +30,15 @@
             <span asp-validation-for="Cost" />
         </div>
     </div>
+
+    <div class="row">
+        <div class="col-6">
+            <label asp-for="UploadedFiles">Загрузить изображение</label><br />
+            <input class="form-control" type="file" name="UploadedFiles" multiple accept="image/"/>
+            <span asp-validation-for="UploadedFiles" />
+        </div>
+    </div>
+
     <div class="col">
         <button type="submit" asp-area="Admin" asp-controller="Product" asp-action="Add">Создать</button>
     </div>

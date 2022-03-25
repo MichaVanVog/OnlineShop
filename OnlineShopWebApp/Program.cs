@@ -2,19 +2,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OnlineShop.Db;
 using OnlineShop.Db.Models;
-using OnlineShopWebApp;
 using OnlineShopWebApp.Controllers;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
-using (var scope = builder.Build())
-{
-    var services = scope.Services.CreateScope();
-    var userManager = services.ServiceProvider.GetService<UserManager<User>>();
-    var roleManager = services.ServiceProvider.GetService<RoleManager<IdentityRole>>();
-    IdentityInitializer.Initialize(userManager, roleManager);
-}
-builder.Services.AddIdentity<User, IdentityRole>();
 builder.Services.ConfigureApplicationCookie(options =>
     {
         options.ExpireTimeSpan = TimeSpan.FromDays(30);
@@ -32,8 +23,6 @@ builder.Services.AddTransient<IProductsRepository, ProductsDbRepository>();
 builder.Services.AddTransient<ICartsRepository, CartsDbRepository>();
 builder.Services.AddTransient<IFavoriteDbRepository, FavoriteDbRepository>();
 builder.Services.AddTransient<IOrdersRepository, OrdersDbRepository>();
-builder.Services.AddSingleton<IRolesRepository, RolesInMemoryRepository>();
-builder.Services.AddSingleton<IUsersManager, UsersManager>();
 builder.Services.AddControllersWithViews();
 
 builder.Host.UseSerilog((hostingContext, loggerConfiguration) =>
@@ -42,6 +31,12 @@ builder.Host.UseSerilog((hostingContext, loggerConfiguration) =>
 });
 
 var app = builder.Build();
+using (var scope = app.Services.CreateScope())
+{
+    var userManager = scope.ServiceProvider.GetService<UserManager<User>>();
+    var roleManager = scope.ServiceProvider.GetService<RoleManager<IdentityRole>>();
+    IdentityInitializer.Initialize(userManager, roleManager);
+}
 
 if (!app.Environment.IsDevelopment())
 {

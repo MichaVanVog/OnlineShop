@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using OnlineShop.Db;
 using OnlineShopWebApp.Areas.Admin.Models;
@@ -9,21 +10,25 @@ namespace OnlineShopWebApp.Areas.Admin.Controllers
     [Authorize(Roles = Constants.AdminRoleName)]
     public class RoleController : Controller
     {
-        private readonly IRolesRepository rolesRepository;
+        private readonly RoleManager<IdentityRole> roleManager;
 
-        public RoleController(IRolesRepository rolesRepository)
+        public RoleController(RoleManager<IdentityRole> roleManager)
         {
-            this.rolesRepository = rolesRepository;
+            this.roleManager = roleManager;
         }
 
         public IActionResult Index()
         {
-            var roles = rolesRepository.GetAll();
-            return View(roles);
+            var roles = roleManager.Roles.ToList();
+            return View(roles.Select(x => new RoleViewModel { Name = x.Name}).ToList());
         }
         public IActionResult Remove(string roleName)
         {
-            rolesRepository.Remove(roleName);
+            var role = roleManager.FindByNameAsync(roleName).Result;
+            if (role != null)
+            {
+                roleManager.DeleteAsync(role).Wait();
+            }
             return RedirectToAction(nameof(Index));
         }
 
@@ -33,16 +38,19 @@ namespace OnlineShopWebApp.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public IActionResult Add(Role role)
+        public IActionResult Add(RoleViewModel role)
         {
-            if (rolesRepository.TryGetByName(role.Name) != null)
+            var result = roleManager.CreateAsync(new IdentityRole(role.Name)).Result;
+            if (result.Succeeded)
             {
-                ModelState.AddModelError("", "Такая роль уже существует");
-            }
-            if (ModelState.IsValid)
-            {
-                rolesRepository.Add(role);
                 return RedirectToAction(nameof(Index));
+            }
+            else
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
             }
             return View(role);
         }

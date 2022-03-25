@@ -9,7 +9,7 @@ namespace OnlineShop.Db
         {
             var adminEmail = "a@a.ru";
             var password = "$Lameri198";
-            if(roleManager.FindByNameAsync(Constants.AdminRoleName).Result == null)
+            if (roleManager.FindByNameAsync(Constants.AdminRoleName).Result == null)
             {
                 roleManager.CreateAsync(new IdentityRole(Constants.AdminRoleName)).Wait();
             }

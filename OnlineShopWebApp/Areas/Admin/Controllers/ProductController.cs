@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OnlineShop.Db;
-using OnlineShop.Db.Models;
+using OnlineShopWebApp.Areas.Admin.Models;
 using OnlineShopWebApp.Helpers;
-using OnlineShopWebApp.Models;
 
 namespace OnlineShopWebApp.Areas.Admin.Controllers
 {
@@ -12,10 +11,12 @@ namespace OnlineShopWebApp.Areas.Admin.Controllers
     public class ProductController : Controller
     {
         private readonly IProductsRepository productsRepository;
+        private readonly ImagesProvider imagesProvider;
 
-        public ProductController(IProductsRepository productsRepository)
+        public ProductController(IProductsRepository productsRepository, ImagesProvider imagesProvider)
         {
             this.productsRepository = productsRepository;
+            this.imagesProvider = imagesProvider;
         }
 
         public IActionResult Index()
@@ -30,47 +31,41 @@ namespace OnlineShopWebApp.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public IActionResult Add(ProductViewModel product)
+        public IActionResult Add(AddProductViewModel product)
         {
             if (!ModelState.IsValid)
             {
                 return View(product);
             }
-
-            var productDb = new Product
-            {
-                Name = product.Name,
-                Cost = product.Cost,
-                Description = product.Description
-            };
-
-            productsRepository.Add(productDb);
+            var imagesPaths = imagesProvider.SafeFiles(product.UploadedFiles, ImageFolders.Products);
+            productsRepository.Add(product.ToProduct(imagesPaths));
             return RedirectToAction(nameof(Index));
         }
 
         public IActionResult Edit(Guid productId)
         {
             var product = productsRepository.TryGetById(productId);
-            return View(product);
+            return View(product.ToEditProductViewModel());
         }
 
         [HttpPost]
-        public IActionResult Edit(ProductViewModel product)
+        public IActionResult Edit(EditProductViewModel product)
         {
             if (!ModelState.IsValid)
             {
                 return View(product);
             }
 
-            var productDb = new Product
-            {
-                Name = product.Name,
-                Cost = product.Cost,
-                Description = product.Description
-            };
-
-            productsRepository.Update(productDb);
+            var imagesPaths = imagesProvider.SafeFiles(product.UploadedFiles, ImageFolders.Products);
+            product.ImagesPaths.AddRange(imagesPaths);
+            productsRepository.Update(product.ToProduct());
             return RedirectToAction(nameof(Index));
         }
+
+        //public IActionResult Remove(Guid productId)
+        //{
+        //    productsRepository.Remove(productId);
+        //    return RedirectToAction(nameof(Index));
+        //}
     }
 }
